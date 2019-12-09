@@ -16,14 +16,19 @@ class ReplayBuffer:
 
     def get_batch_data(self):
         index = np.random.randint(len(self.buffer), size=self.batch_size).tolist()
+        index_relabel = np.random.randint(len(self.buffer), size=self.batch_size).tolist()
         s_a_feature = np.zeros((0, self.state_size + self.action_size))
         s_feature = np.zeros((0, self.state_size))
+        s_relabel_feature = np.zeros((0, self.state_size))
         for ind in index:
             s_a = np.concatenate((self.buffer[ind][0], self.buffer[ind][1]), axis=0).reshape((1, -1))
             s = np.array(self.buffer[ind][2]).reshape((1, -1))
             s_a_feature = np.concatenate((s_a_feature, s_a), axis=0)
             s_feature = np.concatenate((s_feature, s), axis=0)
-        return s_a_feature, s_feature
+        for ind in index_relabel:
+            s = np.array(self.buffer[ind][2]).reshape((1, -1))
+            s_relabel_feature = np.concatenate((s_relabel_feature, s), axis=0)
+        return s_a_feature, s_feature, s_relabel_feature
 
     def __len__(self):
         return len(self.buffer)
