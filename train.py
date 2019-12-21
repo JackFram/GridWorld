@@ -1,6 +1,6 @@
 import argparse
-import numpy as np
-import torch.nn as nn
+import matplotlib.pyplot as plt
+
 from env import BaseEnv
 from model.MLP import MLP
 from agent import Agent
@@ -11,20 +11,20 @@ parser = argparse.ArgumentParser()
 
 # Training Options
 parser.add_argument('--epoch_num', default=20000, type=int)
-parser.add_argument('--max_step', default=50, type=int)
-parser.add_argument('--batch_size', default=40, type=int)
-parser.add_argument('--reg_term', default=1, type=float)
+parser.add_argument('--max_step', default=100, type=int)
+parser.add_argument('--batch_size', default=128, type=int)
+parser.add_argument('--reg_term', default=0.5, type=float)
 parser.add_argument('--grad_clip', default=10, type=float)
 
 # Model Options
-parser.add_argument('--embedding_dim', default=32, type=int)
-parser.add_argument('--s_a_hidden_size', default=(64, 64))
-parser.add_argument('--s_hidden_size', default=(64, 64))
+parser.add_argument('--embedding_dim', default=4, type=int)
+parser.add_argument('--s_a_hidden_size', default=(32, 32))
+parser.add_argument('--s_hidden_size', default=(32, 32))
 parser.add_argument('--s_a_lr', default=1e-4)
 parser.add_argument('--s_lr', default=1e-4)
 
 # Environment Options
-parser.add_argument('--env_size', default=(5, 5))
+parser.add_argument('--env_size', default=(10, 10))
 
 
 def main(args):
@@ -37,11 +37,11 @@ def main(args):
     s_a_optimizer = torch.optim.Adam(f_s_a.parameters(), lr=args.s_a_lr)
     s_optimizer = torch.optim.Adam(f_s.parameters(), lr=args.s_a_lr)
 
-    MSEloss = nn.MSELoss()
+    log_loss = []
 
     for epoch in range(args.epoch_num):
-        start_position = np.random.randint(1, 6, size=2)
-        ns, r, terminate = env.reset(start_pos=start_position)
+        start_position = np.random.randint(1, 11, size=2)
+        ns, r, terminate = env.reset(size=args.env_size, start_pos=start_position)
         for step in range(args.max_step):
             s = ns
             s_feature = agent.get_state_feature(s)
@@ -60,21 +60,28 @@ def main(args):
         loss_normal = torch.mean(torch.norm((s_a_embed - s_embed), dim=1))
         # loss for (s, a, s', g)
         ns_best_action = np.zeros((0, 4))
+        valid_list = []
         for i in range(args.batch_size):
             best_action, min_dist = agent.get_best_action(s_batch[i], f_s_a, f_s, g_batch[i])
             vec_action = vectorize_action(best_action).reshape(1, -1)
             ns_best_action = np.concatenate((ns_best_action, vec_action), axis=0)
+            if all(s_embed[i] != g_embed[i]):
+                valid_list.append(i)
         ns_a_batch = np.concatenate((s_batch, ns_best_action), axis=1)
-        ns_a_embed = f_s_a(ns_a_batch)
-        dist_s = torch.norm((s_a_embed - g_embed), dim=1)
-        dist_ns = torch.norm((ns_a_embed - g_embed), dim=1)
+
+        ns_a_embed = f_s_a.predict(ns_a_batch)
+        g_target_embed = f_s.predict(g_batch)
+        dist_s = torch.norm((s_a_embed - g_embed), dim=1)[valid_list]
+        with torch.no_grad():
+            # calculate target
+            dist_ns = torch.norm(torch.FloatTensor(ns_a_embed - g_target_embed), dim=1)[valid_list]
+            target = dist_ns + 1
         if (epoch + 1) % 100 == 0:
             print(dist_s - dist_ns)
-        # print(dist_s - dist_ns)
-        target = dist_ns + 1
         loss_update = torch.mean(torch.abs(dist_s - target))
         # print(loss_update)
-        loss = loss_normal + args.reg_term * loss_update
+        loss = (1-args.reg_term)*loss_normal + args.reg_term * loss_update
+        log_loss.append(loss)
         s_a_optimizer.zero_grad()
         s_optimizer.zero_grad()
         loss.backward()
@@ -83,7 +90,7 @@ def main(args):
         s_a_optimizer.step()
         s_optimizer.step()
         if (epoch + 1) % 100 == 0:
-            print("epoch number: {}/{}, total_loss: {}, loss_normal: {}, loss_update: {}".format(epoch,
+            print("epoch number: {}/{}, total_loss: {}, loss_normal: {}, loss_update: {}".format(epoch + 1,
                                                                                                 args.epoch_num,
                                                                                                 loss,
                                                                                                 loss_normal,
@@ -95,6 +102,11 @@ def main(args):
         if (epoch + 1) % 1000 == 0 and loss < 1:
             save_model("./model.pt", f_s_a, f_s, args.epoch_num, loss, s_a_optimizer, s_optimizer)
             print("Saving model at epoch: {}".format(epoch))
+
+        if (epoch + 1) % 10000 == 0:
+            plt.plot(range(epoch + 1), log_loss, color='red')
+            plt.savefig("./{}.pdf".format(int((epoch + 1)/10000)), dpi=1200, bbox_inches='tight')
+
 
     # save_model("./model.pt", f_s_a, f_s, args.epoch_num, loss, s_a_optimizer, s_optimizer)
     # print("model saved.")
