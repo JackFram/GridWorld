@@ -7,6 +7,7 @@ class BaseEnv:
     def reset(self, size=(5, 5), start_pos=(1, 1), goal=(5, 5)):
         self.size = size
         self.pos = start_pos
+        self.goal = goal
         return self.pos, 0, False
 
     def step(self, action):

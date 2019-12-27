@@ -34,7 +34,6 @@ class Agent:
 
         return best_action, min_dist
 
-
     def get_state_feature(self, state):
         state_feature = np.zeros((self.env_size[0]*self.env_size[1]))
         assert 1 <= state[0] <= self.env_size[0] and 1 <= state[1] <= self.env_size[1]
