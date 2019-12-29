@@ -37,5 +37,9 @@ class GoalBuffer:
         self.dist = map(lambda x: x/denom, weights)
 
     def sample_batch_goal(self, size):
+        self.generate_dist()
+        min_ = min(self._goal_counter)
+        new_goal_counter = map(lambda x: x - min_ + 1, self._goal_counter)
+        self._goal_counter = new_goal_counter
         ret = np.random.choice(self._goal_space, size=size, replace=True, p=self.dist)
         return ret
