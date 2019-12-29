@@ -13,6 +13,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--epoch_num', default=20000, type=int)
 parser.add_argument('--max_step', default=100, type=int)
 parser.add_argument('--batch_size', default=128, type=int)
+parser.add_argument('--buffer_size', default=10000, type=int)
 parser.add_argument('--reg_term', default=0.5, type=float)
 parser.add_argument('--grad_clip', default=10, type=float)
 
