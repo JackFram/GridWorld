@@ -1,4 +1,5 @@
 import numpy as np
+import torch
 from utils import vectorize_action
 
 
@@ -6,18 +7,18 @@ class Agent:
     def __init__(self, env_size=(5, 5)):
         self.env_size = env_size
 
-    def get_action(self, state_feature, f_s_a, f_s):
-        # action = select(state_feature)
-        action = np.random.randint(4, size=1)
-        if action == 0:
-            ret = 'up'
-        elif action == 1:
-            ret = 'down'
-        elif action == 2:
-            ret = 'left'
-        elif action == 3:
-            ret = 'right'
-        return ret, action
+    # def get_action(self, state_feature, f_s_a, f_s):
+    #     # action = select(state_feature)
+    #     action = np.random.randint(4, size=1)
+    #     if action == 0:
+    #         ret = 'up'
+    #     elif action == 1:
+    #         ret = 'down'
+    #     elif action == 2:
+    #         ret = 'left'
+    #     elif action == 3:
+    #         ret = 'right'
+    #     return ret, action
 
     def get_best_action(self, state_feature, f_s_a, f_s, goal_feature):
         min_dist = 1e10
@@ -33,6 +34,10 @@ class Agent:
                 best_action = action
 
         return best_action, min_dist
+
+    def get_random_action(self):
+        action = np.random.randint(4, size=1)
+        return action
 
     def get_best_actions(self, state_feature, f_s_a, f_s, goal_feature):
         assert state_feature.shape[0] == goal_feature.shape[0]
@@ -59,4 +64,18 @@ class Agent:
             state_feature[(state[0]-1)*self.env_size[1] + state[1] - 1] = 1
             ret_val[idx, :] = state_feature
         return ret_val
+
+    def get_dist(self, states, actions, goals, f_s_a, f_s):
+        if states.ndim == 1:
+            states = states.reshape((1, -1))
+        if actions.ndim == 1:
+            actions = actions.reshape((1, -1))
+        if goals.ndim == 1:
+            goals = goals.reshape((1, -1))
+        with torch.no_grad():
+            sa = np.concatenate((states, actions), axis=1)
+            sa_embed = f_s_a.predict(sa)
+            g_embed = f_s.predict(goals)
+            dist = torch.norm(torch.FloatTensor(sa_embed - g_embed), dim=1)
+        return dist
 

@@ -40,9 +40,10 @@ class GoalBuffer:
     def sample_batch_goal(self, size):
         self.generate_dist()
         min_ = min(self._goal_counter)
-        new_goal_counter = map(lambda x: x - min_ + 1, self._goal_counter)
+        new_goal_counter = list(map(lambda x: x - min_ + 1, self._goal_counter))
         # print(self._goal_space, list(self._goal_counter))
         # print(self.dist)
         self._goal_counter = new_goal_counter
         ret = random.choices(self._goal_space, weights=self.dist, k=size)
+        # ret = random.choices(self._goal_space, k=size)
         return ret

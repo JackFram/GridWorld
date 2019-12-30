@@ -1,4 +1,5 @@
 import numpy as np
+import random
 import math
 
 
@@ -12,12 +13,13 @@ class ReplayBuffer:
         self.action_size = env.action_size
 
     def add(self, item):
-        if item[3] is None or item[2] != item[3]:
+        if item[3] is None or any(item[2] != item[3]):
             if len(self._buffer) < self.buffer_size:
                 self._buffer.append(item[:-1])
                 self._error.append(item[-1])
             else:
-                replace_index = self._error.index(min(self._error))
+                # replace_index = self._error.index(min(self._error))
+                replace_index = random.randint(0, len(self._buffer) - 1)
                 self._buffer[replace_index] = item[:-1]
                 self._error[replace_index] = item[-1]
 
@@ -26,11 +28,11 @@ class ReplayBuffer:
         self._error.pop(index)
 
     def get_batch_data(self):
-        weights = map(lambda x: math.exp(x), self._error)
+        weights = list(map(lambda x: math.exp(x), self._error))
         denom = sum(weights)
-        dist = map(lambda x: x/denom, weights)
-        batch_data = np.random.choice(self._buffer, size=self.batch_size, replace=True, p=dist)
-
+        dist = list(map(lambda x: x/denom, weights))
+        batch_data = random.choices(self._buffer, weights=dist, k=self.batch_size)
+        # batch_data = random.choices(self._buffer, k=self.batch_size)
         batch_1, batch_2 = {}, {}
         batch_1["sa"] = np.zeros((0, self.state_size + self.action_size))
         batch_1["ns"] = np.zeros((0, self.state_size))
