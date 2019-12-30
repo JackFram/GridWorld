@@ -5,6 +5,7 @@ from env import BaseEnv
 from model.MLP import MLP
 from agent import Agent
 from replay_buffer import ReplayBuffer
+from goal_buffer import GoalBuffer
 from utils import *
 
 parser = argparse.ArgumentParser()
@@ -16,6 +17,7 @@ parser.add_argument('--batch_size', default=128, type=int)
 parser.add_argument('--buffer_size', default=10000, type=int)
 parser.add_argument('--reg_term', default=0.5, type=float)
 parser.add_argument('--grad_clip', default=10, type=float)
+parser.add_argument('--random_step', default=100, type=int)
 
 # Model Options
 parser.add_argument('--embedding_dim', default=4, type=int)
@@ -29,19 +31,31 @@ parser.add_argument('--env_size', default=(10, 10))
 
 
 def main(args):
+
+    # environment initialization
     env = BaseEnv(size=args.env_size)
+
+    # embedding network initialization
     f_s_a = MLP(env.state_size + env.action_size, args.s_a_hidden_size, args.embedding_dim)
     f_s = MLP(env.state_size, args.s_hidden_size, args.embedding_dim)
-    buffer = ReplayBuffer(args, env)
+
+    # buffer initialization
+    experience = ReplayBuffer(args, env)
+    goal_buffer = GoalBuffer()
+    init_goal = np.random.randint(1, args.env_size[0] + 1, size=2)
+    goal_buffer.store(init_goal)
+
+    # agent initialization
     agent = Agent(env_size=args.env_size)
 
+    # optimizer initialization
     s_a_optimizer = torch.optim.Adam(f_s_a.parameters(), lr=args.s_a_lr)
     s_optimizer = torch.optim.Adam(f_s.parameters(), lr=args.s_a_lr)
 
     log_loss = []
 
     for epoch in range(args.epoch_num):
-        start_position = np.random.randint(1, 11, size=2)
+        start_position = np.random.randint(1, args.env_size[0]+1, size=2)
         ns, r, terminate = env.reset(size=args.env_size, start_pos=start_position)
         for step in range(args.max_step):
             s = ns
