@@ -13,13 +13,13 @@ class BaseEnv:
     def step(self, action):
         terminate = False
         prev_s = self.pos
-        if action == 'up':
+        if action == 0:
             self.pos = (self.pos[0], min(self.size[1], self.pos[1]+1))
-        elif action == 'down':
+        elif action == 1:
             self.pos = (self.pos[0], max(1, self.pos[1] - 1))
-        elif action == 'left':
+        elif action == 2:
             self.pos = (max(1, self.pos[0] - 1), self.pos[1])
-        elif action == 'right':
+        elif action == 3:
             self.pos = (min(self.size[0], self.pos[0] + 1), self.pos[1])
         next_s = self.pos
         reward = self.get_reward(prev_s, action, next_s)

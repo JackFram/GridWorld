@@ -34,8 +34,29 @@ class Agent:
 
         return best_action, min_dist
 
+    def get_best_actions(self, state_feature, f_s_a, f_s, goal_feature):
+        assert state_feature.shape[0] == goal_feature.shape[0]
+        batch_size = state_feature.shape[0]
+        ns_best_action = np.zeros((0, 4))
+        for i in range(batch_size):
+            best_action, min_dist = self.get_best_action(state_feature[i], f_s_a, f_s, goal_feature[i])
+            vec_action = vectorize_action(best_action).reshape(1, -1)
+            ns_best_action = np.concatenate((ns_best_action, vec_action), axis=0)
+        return ns_best_action
+
     def get_state_feature(self, state):
         state_feature = np.zeros((self.env_size[0]*self.env_size[1]))
         assert 1 <= state[0] <= self.env_size[0] and 1 <= state[1] <= self.env_size[1]
         state_feature[(state[0]-1)*self.env_size[1] + state[1] - 1] = 1
         return state_feature
+
+    def get_states_feature(self, states):
+        batch_size = len(states)
+        ret_val = np.zeros((batch_size, self.env_size[0]*self.env_size[1]))
+        for idx, state in enumerate(states):
+            state_feature = np.zeros((self.env_size[0]*self.env_size[1]))
+            assert 1 <= state[0] <= self.env_size[0] and 1 <= state[1] <= self.env_size[1]
+            state_feature[(state[0]-1)*self.env_size[1] + state[1] - 1] = 1
+            ret_val[idx, :] = state_feature
+        return ret_val
+

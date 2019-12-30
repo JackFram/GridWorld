@@ -40,7 +40,7 @@ def main(args):
     f_s = MLP(env.state_size, args.s_hidden_size, args.embedding_dim)
 
     # buffer initialization
-    experience = ReplayBuffer(args, env)
+    replay_buffer = ReplayBuffer(args, env)
     goal_buffer = GoalBuffer()
     init_goal = tuple(np.random.randint(1, args.env_size[0] + 1, size=2))
     print(init_goal)
@@ -57,18 +57,26 @@ def main(args):
 
     for epoch in range(args.epoch_num):
         start_position = np.random.randint(1, args.env_size[0]+1, size=2)
-        goal = goal_buffer.sample_batch_goal(size=3)
-        print(goal)
-        exit()
+        goal = goal_buffer.sample_batch_goal(size=1)[0]
+        g_feature = agent.get_state_feature(goal)
         ns, r, terminate = env.reset(size=args.env_size, start_pos=start_position)
         for step in range(args.max_step):
             s = ns
             s_feature = agent.get_state_feature(s)
-            action, raw_action = agent.get_action(s_feature, f_s_a, f_s)
+            action, min_dist = agent.get_best_action(s_feature, f_s_a, f_s, g_feature)
             ns, r, terminate = env.step(action)
             ns_feature = agent.get_state_feature(ns)
-            vec_action = vectorize_action(raw_action)
-            buffer.add((s_feature, vec_action, ns_feature))
+            vec_action = vectorize_action(action)
+            print(s_feature.shape, vec_action.shape)
+            # store one step loss
+            s_a_pred = f_s_a.predict(np.concatenate((s_feature, vec_action), axis=0).reshape((1, -1)))
+            ns_pred = f_s.predict(np.array(ns_feature).reshape((1, -1)))
+            e = torch.norm(torch.FloatTensor(s_a_pred - ns_pred), dim=1)[0]
+            replay_buffer.add((s_feature, vec_action, ns_feature, None, e))
+
+            # store two step loss
+
+
             # print(s, s_feature, action, raw_action, ns, ns_feature, vec_action)
 
         s_a_batch, s_batch, g_batch = buffer.get_batch_data()
