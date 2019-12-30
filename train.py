@@ -42,7 +42,8 @@ def main(args):
     # buffer initialization
     experience = ReplayBuffer(args, env)
     goal_buffer = GoalBuffer()
-    init_goal = np.random.randint(1, args.env_size[0] + 1, size=2)
+    init_goal = tuple(np.random.randint(1, args.env_size[0] + 1, size=2))
+    print(init_goal)
     goal_buffer.store(init_goal)
 
     # agent initialization
@@ -56,6 +57,9 @@ def main(args):
 
     for epoch in range(args.epoch_num):
         start_position = np.random.randint(1, args.env_size[0]+1, size=2)
+        goal = goal_buffer.sample_batch_goal(size=3)
+        print(goal)
+        exit()
         ns, r, terminate = env.reset(size=args.env_size, start_pos=start_position)
         for step in range(args.max_step):
             s = ns

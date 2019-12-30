@@ -1,4 +1,5 @@
 import numpy as np
+import random
 import math
 
 
@@ -32,14 +33,16 @@ class GoalBuffer:
         generate sample distribution
         :return:
         '''
-        weights = map(lambda x: math.exp(-x), self._goal_counter)
+        weights = list(map(lambda x: math.exp(-x), self._goal_counter))
         denom = sum(weights)
-        self.dist = map(lambda x: x/denom, weights)
+        self.dist = list(map(lambda x: x/denom, weights))
 
     def sample_batch_goal(self, size):
         self.generate_dist()
         min_ = min(self._goal_counter)
         new_goal_counter = map(lambda x: x - min_ + 1, self._goal_counter)
+        # print(self._goal_space, list(self._goal_counter))
+        # print(self.dist)
         self._goal_counter = new_goal_counter
-        ret = np.random.choice(self._goal_space, size=size, replace=True, p=self.dist)
+        ret = random.choices(self._goal_space, weights=self.dist, k=size)
         return ret
