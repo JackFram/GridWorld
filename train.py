@@ -60,6 +60,7 @@ def main(args):
     for epoch in tqdm.tqdm(range(args.epoch_num)):
         start_position = np.random.randint(1, args.env_size[0]+1, size=2)
         goal = goal_buffer.sample_batch_goal(size=1)[0]
+        print("goal point is :{}".format(goal))
         g_feature = agent.get_state_feature(goal)
         ns, r, terminate = env.reset(size=args.env_size, start_pos=start_position)
         for step in range(args.max_step):
@@ -119,6 +120,8 @@ def main(args):
         batch_1, batch_2 = replay_buffer.get_batch_data()
 
         loss_1 = torch.mean(torch.norm((f_s_a(batch_1['sa']) - f_s(batch_1['ns'])), dim=1))
+
+        print(batch_1['sa'][:2], batch_1['ns'][:2])
 
         na = agent.get_best_actions(batch_2['ns'], f_s_a, f_s, batch_2['g'])
         target = agent.get_dist(batch_2['ns'], na, batch_2['g'], f_s_a, f_s) + 1

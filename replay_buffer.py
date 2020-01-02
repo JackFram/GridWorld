@@ -28,11 +28,11 @@ class ReplayBuffer:
         self._error.pop(index)
 
     def get_batch_data(self):
-        weights = list(map(lambda x: math.exp(x), self._error))
-        denom = sum(weights)
-        dist = list(map(lambda x: x/denom, weights))
-        batch_data = random.choices(self._buffer, weights=dist, k=self.batch_size)
-        # batch_data = random.choices(self._buffer, k=self.batch_size)
+        # weights = list(map(lambda x: math.exp(x), self._error))
+        # denom = sum(weights)
+        # dist = list(map(lambda x: x/denom, weights))
+        # batch_data = random.choices(self._buffer, weights=dist, k=self.batch_size)
+        batch_data = random.choices(self._buffer, k=self.batch_size)
         batch_1, batch_2 = {}, {}
         batch_1["sa"] = np.zeros((0, self.state_size + self.action_size))
         batch_1["ns"] = np.zeros((0, self.state_size))
