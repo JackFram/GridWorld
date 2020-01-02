@@ -1,5 +1,5 @@
 import gym
-env = gym.make('FetchPickAndPlace-v1')
+env = gym.make('Hopper-v3')
 env.reset()
 for _ in range(1000):
     env.render()

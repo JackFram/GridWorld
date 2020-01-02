@@ -19,7 +19,7 @@ parser.add_argument('--batch_size', default=128, type=int)
 parser.add_argument('--buffer_size', default=10000, type=int)
 parser.add_argument('--reg_term', default=0.5, type=float)
 parser.add_argument('--grad_clip', default=10, type=float)
-parser.add_argument('--random_step', default=50, type=int)
+parser.add_argument('--random_step', default=100, type=int)
 
 # Model Options
 parser.add_argument('--embedding_dim', default=4, type=int)
@@ -29,7 +29,7 @@ parser.add_argument('--s_a_lr', default=1e-4)
 parser.add_argument('--s_lr', default=1e-4)
 
 # Environment Options
-parser.add_argument('--env_size', default=(10, 10))
+parser.add_argument('--env_size', default=(5, 5))
 
 
 def main(args):
@@ -42,7 +42,8 @@ def main(args):
     f_s = MLP(env.state_size, args.s_hidden_size, args.embedding_dim)
 
     # buffer initialization
-    replay_buffer = ReplayBuffer(args, env)
+    replay_buffer_1 = ReplayBuffer(args, env)
+    replay_buffer_2 = ReplayBuffer(args, env)
     goal_buffer = GoalBuffer()
     init_goal = tuple(np.random.randint(1, args.env_size[0] + 1, size=2))
     print(init_goal)
@@ -60,36 +61,36 @@ def main(args):
     for epoch in tqdm.tqdm(range(args.epoch_num)):
         start_position = np.random.randint(1, args.env_size[0]+1, size=2)
         goal = goal_buffer.sample_batch_goal(size=1)[0]
-        print("goal point is :{}".format(goal))
+        # print("goal point is :{}".format(goal))
         g_feature = agent.get_state_feature(goal)
         ns, r, terminate = env.reset(size=args.env_size, start_pos=start_position)
-        for step in range(args.max_step):
-            s = ns
-            s_feature = agent.get_state_feature(s)
-            action, min_dist = agent.get_best_action(s_feature, f_s_a, f_s, g_feature)
-            ns, r, terminate = env.step(action)
-            goal_buffer.store(ns)
-            ns_feature = agent.get_state_feature(ns)
-            vec_action = vectorize_action(action)
-            # print(s_feature.shape, vec_action.shape)
-            # store one step loss
-            # s_a_pred = f_s_a.predict(np.concatenate((s_feature, vec_action), axis=0).reshape((1, -1)))
-            # ns_pred = f_s.predict(np.array(ns_feature).reshape((1, -1)))
-            e_1 = agent.get_dist(s_feature, vec_action, ns_feature, f_s_a, f_s)[0]
-            replay_buffer.add((s_feature, vec_action, ns_feature, None, e_1))
-
-            # store two step loss
-            sub_g = goal_buffer.sample_batch_goal(size=1)
-            sub_g_feature = agent.get_states_feature(sub_g)[0]
-            na, min_dist = agent.get_best_action(ns_feature, f_s_a, f_s, sub_g_feature)
-
-            dist_ns = agent.get_dist(ns_feature, vectorize_action(na), sub_g_feature, f_s_a, f_s)
-            target = dist_ns + 1
-            dist_s = agent.get_dist(s_feature, vec_action, sub_g_feature, f_s_a, f_s)
-            e_2 = abs(dist_s - target)
-            replay_buffer.add((s_feature, vec_action, ns_feature, sub_g_feature, e_2))
-            if terminate:
-                break
+        # for step in range(args.max_step):
+        #     s = ns
+        #     s_feature = agent.get_state_feature(s)
+        #     action, min_dist = agent.get_best_action(s_feature, f_s_a, f_s, g_feature)
+        #     ns, r, terminate = env.step(action)
+        #     goal_buffer.store(ns)
+        #     ns_feature = agent.get_state_feature(ns)
+        #     vec_action = vectorize_action(action)
+        #     # print(s_feature.shape, vec_action.shape)
+        #     # store one step loss
+        #     # s_a_pred = f_s_a.predict(np.concatenate((s_feature, vec_action), axis=0).reshape((1, -1)))
+        #     # ns_pred = f_s.predict(np.array(ns_feature).reshape((1, -1)))
+        #     e_1 = agent.get_dist(s_feature, vec_action, ns_feature, f_s_a, f_s)[0]
+        #     replay_buffer_1.add((s_feature, vec_action, ns_feature, None, e_1))
+        #
+        #     # store two step loss
+        #     sub_g = goal_buffer.sample_batch_goal(size=1)
+        #     sub_g_feature = agent.get_states_feature(sub_g)[0]
+        #     na, min_dist = agent.get_best_action(ns_feature, f_s_a, f_s, sub_g_feature)
+        #
+        #     dist_ns = agent.get_dist(ns_feature, vectorize_action(na), sub_g_feature, f_s_a, f_s)
+        #     target = dist_ns + 1
+        #     dist_s = agent.get_dist(s_feature, vec_action, sub_g_feature, f_s_a, f_s)
+        #     e_2 = abs(dist_s - target)
+        #     replay_buffer_2.add((s_feature, vec_action, ns_feature, sub_g_feature, e_2))
+        #     if terminate:
+        #         break
 
         for step in range(args.random_step):
             s = ns
@@ -104,7 +105,7 @@ def main(args):
             # s_a_pred = f_s_a.predict(np.concatenate((s_feature, vec_action), axis=0).reshape((1, -1)))
             # ns_pred = f_s.predict(np.array(ns_feature).reshape((1, -1)))
             e_1 = agent.get_dist(s_feature, vec_action, ns_feature, f_s_a, f_s)[0]
-            replay_buffer.add((s_feature, vec_action, ns_feature, None, e_1))
+            replay_buffer_1.add((s_feature, vec_action, ns_feature, None, e_1))
 
             # store two step loss
             sub_g = goal_buffer.sample_batch_goal(size=1)
@@ -115,13 +116,13 @@ def main(args):
             target = dist_ns + 1
             dist_s = agent.get_dist(s_feature, vec_action, sub_g_feature, f_s_a, f_s)
             e_2 = abs(dist_s - target)
-            replay_buffer.add((s_feature, vec_action, ns_feature, sub_g_feature, e_2))
+            replay_buffer_2.add((s_feature, vec_action, ns_feature, sub_g_feature, e_2))
 
-        batch_1, batch_2 = replay_buffer.get_batch_data()
+        batch_1, _ = replay_buffer_1.get_batch_data()
+
+        _, batch_2 = replay_buffer_2.get_batch_data()
 
         loss_1 = torch.mean(torch.norm((f_s_a(batch_1['sa']) - f_s(batch_1['ns'])), dim=1))
-
-        print(batch_1['sa'][:2], batch_1['ns'][:2])
 
         na = agent.get_best_actions(batch_2['ns'], f_s_a, f_s, batch_2['g'])
         target = agent.get_dist(batch_2['ns'], na, batch_2['g'], f_s_a, f_s) + 1
@@ -129,8 +130,12 @@ def main(args):
 
         if (epoch + 1) % 100 == 0:
             print(pred - target)
+            # goal_buffer.goal_visualize()
 
         loss_2 = torch.mean(torch.abs(pred - target))
+
+        # if epoch >= 1500:
+        #     args.reg_term = 0.5
 
         loss = (1 - args.reg_term) * loss_1 + args.reg_term * loss_2
         log_loss.append(loss)
