@@ -2,14 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="5829f924-4e4c-4568-bbb1-7037f06a3543" name="Default" comment="">
-      <change type="DELETED" beforePath="$PROJECT_DIR$/3.pdf" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/4.pdf" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/5.pdf" afterPath="" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/model.pt" afterPath="" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/1.pdf" afterPath="$PROJECT_DIR$/1.pdf" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/2.pdf" afterPath="$PROJECT_DIR$/2.pdf" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/goal_buffer.py" afterPath="$PROJECT_DIR$/goal_buffer.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/model.pt" afterPath="$PROJECT_DIR$/model.pt" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/replay_buffer.py" afterPath="$PROJECT_DIR$/replay_buffer.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/train.py" afterPath="$PROJECT_DIR$/train.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/visualize_embed.py" afterPath="$PROJECT_DIR$/visualize_embed.py" />
@@ -38,7 +33,7 @@
       <file leaf-file-name="visualize_embed.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/visualize_embed.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="381">
+            <state relative-caret-position="-307">
               <caret line="26" column="47" lean-forward="false" selection-start-line="26" selection-start-column="47" selection-end-line="26" selection-end-column="47" />
               <folding>
                 <element signature="e#0#15#0" expanded="true" />
@@ -50,8 +45,8 @@
       <file leaf-file-name="train.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/train.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="348">
-              <caret line="31" column="44" lean-forward="false" selection-start-line="31" selection-start-column="44" selection-end-line="31" selection-end-column="44" />
+            <state relative-caret-position="437">
+              <caret line="131" column="59" lean-forward="false" selection-start-line="131" selection-start-column="59" selection-end-line="131" selection-end-column="59" />
               <folding>
                 <element signature="e#0#15#0" expanded="true" />
               </folding>
@@ -62,8 +57,8 @@
       <file leaf-file-name="replay_buffer.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/replay_buffer.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="502">
-              <caret line="50" column="17" lean-forward="true" selection-start-line="50" selection-start-column="17" selection-end-line="50" selection-end-column="17" />
+            <state relative-caret-position="392">
+              <caret line="65" column="35" lean-forward="true" selection-start-line="65" selection-start-column="35" selection-end-line="65" selection-end-column="35" />
               <folding>
                 <element signature="e#0#18#0" expanded="true" />
               </folding>
@@ -104,9 +99,9 @@
         <option value="$PROJECT_DIR$/gym_test.py" />
         <option value="$PROJECT_DIR$/discrete/visualize_embed.py" />
         <option value="$PROJECT_DIR$/goal_buffer.py" />
+        <option value="$PROJECT_DIR$/visualize_embed.py" />
         <option value="$PROJECT_DIR$/train.py" />
         <option value="$PROJECT_DIR$/replay_buffer.py" />
-        <option value="$PROJECT_DIR$/visualize_embed.py" />
       </list>
     </option>
   </component>
@@ -580,20 +575,10 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/visualize_embed.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="381">
+        <state relative-caret-position="-307">
           <caret line="26" column="47" lean-forward="false" selection-start-line="26" selection-start-column="47" selection-end-line="26" selection-end-column="47" />
           <folding>
             <element signature="e#0#15#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/replay_buffer.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="502">
-          <caret line="50" column="17" lean-forward="true" selection-start-line="50" selection-start-column="17" selection-end-line="50" selection-end-column="17" />
-          <folding>
-            <element signature="e#0#18#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -608,10 +593,20 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/replay_buffer.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="392">
+          <caret line="65" column="35" lean-forward="true" selection-start-line="65" selection-start-column="35" selection-end-line="65" selection-end-column="35" />
+          <folding>
+            <element signature="e#0#18#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/train.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="348">
-          <caret line="31" column="44" lean-forward="false" selection-start-line="31" selection-start-column="44" selection-end-line="31" selection-end-column="44" />
+        <state relative-caret-position="437">
+          <caret line="131" column="59" lean-forward="false" selection-start-line="131" selection-start-column="59" selection-end-line="131" selection-end-column="59" />
           <folding>
             <element signature="e#0#15#0" expanded="true" />
           </folding>

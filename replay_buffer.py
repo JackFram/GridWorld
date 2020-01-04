@@ -59,7 +59,12 @@ class ReplayBuffer:
         for ind in sorted(set(index), reverse=True):
             self._buffer.pop(ind)
 
-        return batch_1, batch_2
+        return batch_1, batch_2, index
+
+    def update_error(self, index, error):
+        assert len(index) == len(error)
+        for i in range(len(index)):
+            self._buffer[index[i]][-1] = error[i]
 
     def __len__(self):
         return len(self._buffer)

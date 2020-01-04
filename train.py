@@ -29,7 +29,7 @@ parser.add_argument('--s_a_lr', default=1e-4)
 parser.add_argument('--s_lr', default=1e-4)
 
 # Environment Options
-parser.add_argument('--env_size', default=(5, 5))
+parser.add_argument('--env_size', default=(10, 10))
 
 
 def main(args):
@@ -129,6 +129,7 @@ def main(args):
 
         if (epoch + 1) % 100 == 0:
             print(pred - target)
+            print(len(replay_buffer_1), len(replay_buffer_2))
             # goal_buffer.goal_visualize()
 
         loss_2 = torch.mean(torch.abs(pred - target))

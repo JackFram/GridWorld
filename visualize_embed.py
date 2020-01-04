@@ -23,7 +23,7 @@ parser.add_argument('--s_a_lr', default=1e-5)
 parser.add_argument('--s_lr', default=1e-5)
 
 # Environment Options
-parser.add_argument('--env_size', default=(5, 5))
+parser.add_argument('--env_size', default=(10, 10))
 parser.add_argument('--goal_pos', default=(5, 5))
 
 
