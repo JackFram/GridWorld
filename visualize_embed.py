@@ -24,7 +24,7 @@ parser.add_argument('--s_lr', default=1e-5)
 
 # Environment Options
 parser.add_argument('--env_size', default=(5, 5))
-parser.add_argument('--goal_pos', default=(1, 1))
+parser.add_argument('--goal_pos', default=(5, 5))
 
 
 def visualize(args):

@@ -19,7 +19,7 @@ parser.add_argument('--batch_size', default=128, type=int)
 parser.add_argument('--buffer_size', default=10000, type=int)
 parser.add_argument('--reg_term', default=0.5, type=float)
 parser.add_argument('--grad_clip', default=10, type=float)
-parser.add_argument('--random_step', default=100, type=int)
+parser.add_argument('--random_step', default=50, type=int)
 
 # Model Options
 parser.add_argument('--embedding_dim', default=4, type=int)
@@ -46,7 +46,6 @@ def main(args):
     replay_buffer_2 = ReplayBuffer(args, env)
     goal_buffer = GoalBuffer()
     init_goal = tuple(np.random.randint(1, args.env_size[0] + 1, size=2))
-    print(init_goal)
     goal_buffer.store(init_goal)
 
     # agent initialization
@@ -64,33 +63,33 @@ def main(args):
         # print("goal point is :{}".format(goal))
         g_feature = agent.get_state_feature(goal)
         ns, r, terminate = env.reset(size=args.env_size, start_pos=start_position)
-        # for step in range(args.max_step):
-        #     s = ns
-        #     s_feature = agent.get_state_feature(s)
-        #     action, min_dist = agent.get_best_action(s_feature, f_s_a, f_s, g_feature)
-        #     ns, r, terminate = env.step(action)
-        #     goal_buffer.store(ns)
-        #     ns_feature = agent.get_state_feature(ns)
-        #     vec_action = vectorize_action(action)
-        #     # print(s_feature.shape, vec_action.shape)
-        #     # store one step loss
-        #     # s_a_pred = f_s_a.predict(np.concatenate((s_feature, vec_action), axis=0).reshape((1, -1)))
-        #     # ns_pred = f_s.predict(np.array(ns_feature).reshape((1, -1)))
-        #     e_1 = agent.get_dist(s_feature, vec_action, ns_feature, f_s_a, f_s)[0]
-        #     replay_buffer_1.add((s_feature, vec_action, ns_feature, None, e_1))
-        #
-        #     # store two step loss
-        #     sub_g = goal_buffer.sample_batch_goal(size=1)
-        #     sub_g_feature = agent.get_states_feature(sub_g)[0]
-        #     na, min_dist = agent.get_best_action(ns_feature, f_s_a, f_s, sub_g_feature)
-        #
-        #     dist_ns = agent.get_dist(ns_feature, vectorize_action(na), sub_g_feature, f_s_a, f_s)
-        #     target = dist_ns + 1
-        #     dist_s = agent.get_dist(s_feature, vec_action, sub_g_feature, f_s_a, f_s)
-        #     e_2 = abs(dist_s - target)
-        #     replay_buffer_2.add((s_feature, vec_action, ns_feature, sub_g_feature, e_2))
-        #     if terminate:
-        #         break
+        for step in range(args.max_step):
+            s = ns
+            s_feature = agent.get_state_feature(s)
+            action, min_dist = agent.get_best_action(s_feature, f_s_a, f_s, g_feature)
+            ns, r, terminate = env.step(action)
+            goal_buffer.store(ns)
+            ns_feature = agent.get_state_feature(ns)
+            vec_action = vectorize_action(action)
+            # print(s_feature.shape, vec_action.shape)
+            # store one step loss
+            # s_a_pred = f_s_a.predict(np.concatenate((s_feature, vec_action), axis=0).reshape((1, -1)))
+            # ns_pred = f_s.predict(np.array(ns_feature).reshape((1, -1)))
+            e_1 = agent.get_dist(s_feature, vec_action, ns_feature, f_s_a, f_s)[0]
+            replay_buffer_1.add((s_feature, vec_action, ns_feature, None, e_1))
+
+            # store two step loss
+            sub_g = goal_buffer.sample_batch_goal(size=1, with_weights=False)
+            sub_g_feature = agent.get_states_feature(sub_g)[0]
+            na, min_dist = agent.get_best_action(ns_feature, f_s_a, f_s, sub_g_feature)
+
+            dist_ns = agent.get_dist(ns_feature, vectorize_action(na), sub_g_feature, f_s_a, f_s)
+            target = dist_ns + 1
+            dist_s = agent.get_dist(s_feature, vec_action, sub_g_feature, f_s_a, f_s)
+            e_2 = abs(dist_s - target)
+            replay_buffer_2.add((s_feature, vec_action, ns_feature, sub_g_feature, e_2))
+            if terminate:
+                break
 
         for step in range(args.random_step):
             s = ns
@@ -108,7 +107,7 @@ def main(args):
             replay_buffer_1.add((s_feature, vec_action, ns_feature, None, e_1))
 
             # store two step loss
-            sub_g = goal_buffer.sample_batch_goal(size=1)
+            sub_g = goal_buffer.sample_batch_goal(size=1, with_weights=False)
             sub_g_feature = agent.get_states_feature(sub_g)[0]
             na, min_dist = agent.get_best_action(ns_feature, f_s_a, f_s, sub_g_feature)
 

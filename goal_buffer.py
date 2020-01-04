@@ -38,15 +38,17 @@ class GoalBuffer:
         denom = sum(weights)
         self.dist = list(map(lambda x: x/denom, weights))
 
-    def sample_batch_goal(self, size):
-        # min_ = min(self._goal_counter)
-        # new_goal_counter = list(map(lambda x: x - min_ + 1, self._goal_counter))
+    def sample_batch_goal(self, size, with_weights=True):
+        min_ = min(self._goal_counter)
+        new_goal_counter = list(map(lambda x: x - min_ + 1, self._goal_counter))
         # # print(self._goal_space, list(self._goal_counter))
         # # print(self.dist)
-        # self._goal_counter = new_goal_counter
-        # self.generate_dist()
-        # ret = random.choices(self._goal_space, weights=self.dist, k=size)
-        ret = random.choices(self._goal_space, k=size)
+        self._goal_counter = new_goal_counter
+        if with_weights:
+            self.generate_dist()
+            ret = random.choices(self._goal_space, weights=self.dist, k=size)
+        else:
+            ret = random.choices(self._goal_space, k=size)
         return ret
 
     def goal_visualize(self):
