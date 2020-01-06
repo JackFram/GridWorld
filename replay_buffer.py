@@ -26,10 +26,14 @@ class ReplayBuffer:
         self._buffer.pop(index)
 
     def get_batch_data(self):
-        weights = list(map(lambda x: math.exp(x[-1]), self._buffer))
-        denom = sum(weights)
-        dist = list(map(lambda x: x/denom, weights))
-        index = random.choices(range(len(self._buffer)), weights=dist, k=self.batch_size)
+        epsilon = random.uniform(0, 1)
+        if epsilon > 0.5:
+            weights = list(map(lambda x: math.exp(x[-1]), self._buffer))
+            denom = sum(weights)
+            dist = list(map(lambda x: x/denom, weights))
+            index = random.choices(range(len(self._buffer)), weights=dist, k=self.batch_size)
+        else:
+            index = random.choices(range(len(self._buffer)), k=self.batch_size)
         # print(index)
         # exit()
         # batch_data = random.choices(self._buffer, weights=dist, k=self.batch_size)
@@ -56,8 +60,8 @@ class ReplayBuffer:
                 batch_2["ns"] = np.concatenate((batch_2["ns"], s), axis=0)
                 batch_2["g"] = np.concatenate((batch_2["g"], g), axis=0)
 
-        for ind in sorted(set(index), reverse=True):
-            self._buffer.pop(ind)
+        # for ind in sorted(set(index), reverse=True):
+        #     self._buffer.pop(ind)
 
         return batch_1, batch_2, index
 
